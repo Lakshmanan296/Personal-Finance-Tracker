@@ -3,74 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Finance Tracker</title>
+    <title>Finance Tracker</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
             text-align: center;
-            background-color: #f4f4f4;
+            transition: all 0.5s ease-in-out;
         }
+
         .container {
-            margin: 20px auto;
+            margin: 50px auto;
+            width: 320px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease-in-out;
         }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
         input, select, button {
-            margin: 5px;
-            padding: 10px;
+            width: 100%;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            transition: 0.3s;
         }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        input::placeholder {
+            color: #ddd;
+        }
+
+        button {
+            background: #ff7b54;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #ff5733;
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none;
+        }
+
         table {
-            width: 60%;
-            margin: auto;
+            width: 80%;
+            margin: 20px auto;
             border-collapse: collapse;
         }
+
         th, td {
-            border: 1px solid black;
+            padding: 12px;
+            border-bottom: 1px solid white;
+            transition: all 0.3s;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .delete {
+            background: red;
+        }
+
+        .delete:hover {
+            background: darkred;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff3e3e;
             padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
         }
-        button {
-            cursor: pointer;
-            background-color: green;
-            color: white;
-            border: none;
-            padding: 8px 12px;
+
+        .logout-btn:hover {
+            background: darkred;
         }
-        button.delete {
-            background-color: red;
+
+        .fadeIn {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <h1>💰 Personal Finance Tracker</h1>
-    
-    <div class="container">
-        <input type="text" id="desc" placeholder="Enter Description">
-        <input type="number" id="amount" placeholder="Enter Amount">
-        <select id="type">
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-        </select>
-        <button onclick="addTransaction()">Add</button>
+
+    <!-- Signup & Login Forms -->
+    <div class="container fadeIn" id="auth-container">
+        <h1 id="auth-title">Sign Up</h1>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="authenticate()">Sign Up</button>
+        <p id="toggle-auth">Already have an account? <a href="#" onclick="toggleAuth()">Login</a></p>
     </div>
 
-    <h2>Transactions</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Type</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="transaction-list"></tbody>
-    </table>
+    <!-- Finance Tracker -->
+    <div id="finance-container" class="hidden fadeIn">
+        <button onclick="logout()" class="logout-btn">Logout</button>
+        <h1>💰 Finance Tracker</h1>
 
-    <h2>Total Balance: <span id="balance">0</span></h2>
+        <div class="container">
+            <input type="text" id="desc" placeholder="Enter Description">
+            <input type="number" id="amount" placeholder="Enter Amount">
+            <select id="type">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+            <button onclick="addTransaction()">Add</button>
+        </div>
+
+        <h2>Transactions</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Type</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="transaction-list"></tbody>
+        </table>
+
+        <h2>Total Balance: <span id="balance">0</span></h2>
+    </div>
 
     <script>
         let transactions = [];
+        let currentUser = null;
+
+        function toggleAuth() {
+            const title = document.getElementById("auth-title");
+            const button = document.querySelector("#auth-container button");
+            const toggleText = document.getElementById("toggle-auth");
+
+            if (title.innerText === "Sign Up") {
+                title.innerText = "Login";
+                button.innerText = "Login";
+                toggleText.innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleAuth()">Sign Up</a>';
+            } else {
+                title.innerText = "Sign Up";
+                button.innerText = "Sign Up";
+                toggleText.innerHTML = 'Already have an account? <a href="#" onclick="toggleAuth()">Login</a>';
+            }
+        }
+
+        function authenticate() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const authType = document.getElementById("auth-title").innerText;
+
+            if (!username || !password) {
+                alert("Please enter valid details!");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (authType === "Sign Up") {
+                if (users[username]) {
+                    alert("Username already exists!");
+                    return;
+                }
+                users[username] = password;
+                localStorage.setItem("users", JSON.stringify(users));
+                alert("Account created! Now login.");
+                toggleAuth();
+            } else {
+                if (users[username] && users[username] === password) {
+                    currentUser = username;
+                    localStorage.setItem("currentUser", currentUser);
+                    showFinanceTracker();
+                } else {
+                    alert("Invalid login credentials.");
+                }
+            }
+        }
+
+        function showFinanceTracker() {
+            document.getElementById("auth-container").classList.add("hidden");
+            document.getElementById("finance-container").classList.remove("hidden");
+
+            currentUser = localStorage.getItem("currentUser");
+            transactions = JSON.parse(localStorage.getItem(currentUser + "_transactions")) || [];
+            updateUI();
+        }
+
+        function logout() {
+            localStorage.removeItem("currentUser");
+            location.reload();
+        }
 
         function addTransaction() {
-            let desc = document.getElementById("desc").value;
+            let desc = document.getElementById("desc").value.trim();
             let amount = parseFloat(document.getElementById("amount").value);
             let type = document.getElementById("type").value;
 
@@ -81,33 +241,21 @@
 
             let transaction = { desc, amount, type };
             transactions.push(transaction);
+            localStorage.setItem(currentUser + "_transactions", JSON.stringify(transactions));
             updateUI();
         }
 
         function updateUI() {
-            let transactionList = document.getElementById("transaction-list");
             let balance = 0;
+            document.getElementById("transaction-list").innerHTML = transactions.map((t, i) => 
+                `<tr><td>${t.desc}</td><td>${t.amount}</td><td>${t.type}</td><td><button class="delete" onclick="deleteTransaction(${i})">Delete</button></td></tr>`
+            ).join("");
 
-            transactionList.innerHTML = "";
-
-            transactions.forEach((t, index) => {
-                let row = `<tr>
-                    <td>${t.desc}</td>
-                    <td>${t.amount}</td>
-                    <td>${t.type}</td>
-                    <td><button class="delete" onclick="deleteTransaction(${index})">Delete</button></td>
-                </tr>`;
-                transactionList.innerHTML += row;
-                balance += t.type === "income" ? t.amount : -t.amount;
-            });
-
+            transactions.forEach(t => balance += t.type === "income" ? t.amount : -t.amount);
             document.getElementById("balance").innerText = balance;
         }
 
-        function deleteTransaction(index) {
-            transactions.splice(index, 1);
-            updateUI();
-        }
+        if (localStorage.getItem("currentUser")) showFinanceTracker();
     </script>
 </body>
 </html>
