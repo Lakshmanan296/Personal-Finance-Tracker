@@ -112,8 +112,8 @@
             top: 10px;
             right: 10px;
             background: #d32f2f;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 30px;
             font-size: 14px;
             color: white;
             cursor: pointer;
@@ -122,6 +122,17 @@
 
         .logout-btn:hover {
             background: #b71c1c;
+        }
+
+        #filter {
+            width: 200px;
+            margin: 15px auto;
+            padding: 10px;
+            border-radius: 5px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: none;
+            outline: none;
         }
     </style>
 </head>
@@ -150,6 +161,13 @@
         </div>
 
         <h2>Transactions</h2>
+
+        <select id="filter" onchange="filterTransactions()">
+            <option value="all">Show Both</option>
+            <option value="income">Show Income</option>
+            <option value="expense">Show Expenses</option>
+        </select>
+
         <table>
             <thead>
                 <tr>
@@ -254,6 +272,14 @@
 
         function updateUI() {
             document.getElementById("transaction-list").innerHTML = transactions.map((t, i) => 
+                `<tr><td>${t.desc}</td><td>${t.amount}</td><td>${t.type}</td><td><button class="delete" onclick="deleteTransaction(${i})">Delete</button></td></tr>`
+            ).join("");
+        }
+
+        function filterTransactions() {
+            let filter = document.getElementById("filter").value;
+            let filtered = transactions.filter(t => filter === "all" || t.type === filter);
+            document.getElementById("transaction-list").innerHTML = filtered.map((t, i) => 
                 `<tr><td>${t.desc}</td><td>${t.amount}</td><td>${t.type}</td><td><button class="delete" onclick="deleteTransaction(${i})">Delete</button></td></tr>`
             ).join("");
         }
