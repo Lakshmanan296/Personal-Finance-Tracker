@@ -5,36 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Tracker</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: #fff;
+            background: #121212;
+            color: #e0e0e0;
             text-align: center;
             transition: all 0.5s ease-in-out;
         }
 
         .container {
             margin: 50px auto;
-            width: 320px;
-            background: rgba(255, 255, 255, 0.1);
+            width: 350px;
+            background: #1e1e1e;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
             transition: all 0.3s ease-in-out;
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 26px;
             margin-bottom: 20px;
+            color: #ffffff;
         }
 
         input, select, button {
@@ -48,16 +48,16 @@
         }
 
         input, select {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            background: #2a2a2a;
+            color: #e0e0e0;
         }
 
         input::placeholder {
-            color: #ddd;
+            color: #bdbdbd;
         }
 
         button {
-            background: #ff7b54;
+            background: #ff9800;
             color: white;
             font-weight: bold;
             cursor: pointer;
@@ -65,7 +65,7 @@
         }
 
         button:hover {
-            background: #ff5733;
+            background: #e68900;
             transform: scale(1.05);
         }
 
@@ -74,41 +74,45 @@
         }
 
         table {
-            width: 80%;
+            width: 90%;
             margin: 20px auto;
             border-collapse: collapse;
+            background: #1e1e1e;
+            color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
         }
 
         th, td {
             padding: 12px;
-            border-bottom: 1px solid white;
+            border-bottom: 1px solid #333;
             transition: all 0.3s;
         }
 
         th {
-            background: rgba(255, 255, 255, 0.2);
+            background: #2a2a2a;
         }
 
         .delete {
-            background: red;
+            background: #d32f2f;
         }
 
         .delete:hover {
-            background: darkred;
+            background: #b71c1c;
         }
 
         .logout-btn {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: #ff3e3e;
+            background: #d32f2f;
             padding: 10px;
             border-radius: 5px;
             font-size: 14px;
         }
 
         .logout-btn:hover {
-            background: darkred;
+            background: #b71c1c;
         }
 
         .fadeIn {
@@ -122,8 +126,6 @@
     </style>
 </head>
 <body>
-
-    <!-- Signup & Login Forms -->
     <div class="container fadeIn" id="auth-container">
         <h1 id="auth-title">Sign Up</h1>
         <input type="text" id="username" placeholder="Username">
@@ -132,7 +134,6 @@
         <p id="toggle-auth">Already have an account? <a href="#" onclick="toggleAuth()">Login</a></p>
     </div>
 
-    <!-- Finance Tracker -->
     <div id="finance-container" class="hidden fadeIn">
         <button onclick="logout()" class="logout-btn">Logout</button>
         <h1>💰 Finance Tracker</h1>
@@ -162,100 +163,5 @@
 
         <h2>Total Balance: <span id="balance">0</span></h2>
     </div>
-
-    <script>
-        let transactions = [];
-        let currentUser = null;
-
-        function toggleAuth() {
-            const title = document.getElementById("auth-title");
-            const button = document.querySelector("#auth-container button");
-            const toggleText = document.getElementById("toggle-auth");
-
-            if (title.innerText === "Sign Up") {
-                title.innerText = "Login";
-                button.innerText = "Login";
-                toggleText.innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleAuth()">Sign Up</a>';
-            } else {
-                title.innerText = "Sign Up";
-                button.innerText = "Sign Up";
-                toggleText.innerHTML = 'Already have an account? <a href="#" onclick="toggleAuth()">Login</a>';
-            }
-        }
-
-        function authenticate() {
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value.trim();
-            const authType = document.getElementById("auth-title").innerText;
-
-            if (!username || !password) {
-                alert("Please enter valid details!");
-                return;
-            }
-
-            let users = JSON.parse(localStorage.getItem("users")) || {};
-
-            if (authType === "Sign Up") {
-                if (users[username]) {
-                    alert("Username already exists!");
-                    return;
-                }
-                users[username] = password;
-                localStorage.setItem("users", JSON.stringify(users));
-                alert("Account created! Now login.");
-                toggleAuth();
-            } else {
-                if (users[username] && users[username] === password) {
-                    currentUser = username;
-                    localStorage.setItem("currentUser", currentUser);
-                    showFinanceTracker();
-                } else {
-                    alert("Invalid login credentials.");
-                }
-            }
-        }
-
-        function showFinanceTracker() {
-            document.getElementById("auth-container").classList.add("hidden");
-            document.getElementById("finance-container").classList.remove("hidden");
-
-            currentUser = localStorage.getItem("currentUser");
-            transactions = JSON.parse(localStorage.getItem(currentUser + "_transactions")) || [];
-            updateUI();
-        }
-
-        function logout() {
-            localStorage.removeItem("currentUser");
-            location.reload();
-        }
-
-        function addTransaction() {
-            let desc = document.getElementById("desc").value.trim();
-            let amount = parseFloat(document.getElementById("amount").value);
-            let type = document.getElementById("type").value;
-
-            if (!desc || isNaN(amount)) {
-                alert("Please enter valid details!");
-                return;
-            }
-
-            let transaction = { desc, amount, type };
-            transactions.push(transaction);
-            localStorage.setItem(currentUser + "_transactions", JSON.stringify(transactions));
-            updateUI();
-        }
-
-        function updateUI() {
-            let balance = 0;
-            document.getElementById("transaction-list").innerHTML = transactions.map((t, i) => 
-                `<tr><td>${t.desc}</td><td>${t.amount}</td><td>${t.type}</td><td><button class="delete" onclick="deleteTransaction(${i})">Delete</button></td></tr>`
-            ).join("");
-
-            transactions.forEach(t => balance += t.type === "income" ? t.amount : -t.amount);
-            document.getElementById("balance").innerText = balance;
-        }
-
-        if (localStorage.getItem("currentUser")) showFinanceTracker();
-    </script>
 </body>
 </html>
