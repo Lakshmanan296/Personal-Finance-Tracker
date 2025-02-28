@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            margin: 20px auto;
+        }
+        input, select, button {
+            margin: 5px;
+            padding: 10px;
+        }
+        table {
+            width: 60%;
+            margin: auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        button {
+            cursor: pointer;
+            background-color: green;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+        }
+        button.delete {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>💰 Personal Finance Tracker</h1>
+    
+    <div class="container">
+        <input type="text" id="desc" placeholder="Enter Description">
+        <input type="number" id="amount" placeholder="Enter Amount">
+        <select id="type">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+        </select>
+        <button onclick="addTransaction()">Add</button>
+    </div>
+
+    <h2>Transactions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="transaction-list"></tbody>
+    </table>
+
+    <h2>Total Balance: <span id="balance">0</span></h2>
+
+    <script>
+        let transactions = [];
+
+        function addTransaction() {
+            let desc = document.getElementById("desc").value;
+            let amount = parseFloat(document.getElementById("amount").value);
+            let type = document.getElementById("type").value;
+
+            if (!desc || isNaN(amount)) {
+                alert("Please enter valid details!");
+                return;
+            }
+
+            let transaction = { desc, amount, type };
+            transactions.push(transaction);
+            updateUI();
+        }
+
+        function updateUI() {
+            let transactionList = document.getElementById("transaction-list");
+            let balance = 0;
+
+            transactionList.innerHTML = "";
+
+            transactions.forEach((t, index) => {
+                let row = `<tr>
+                    <td>${t.desc}</td>
+                    <td>${t.amount}</td>
+                    <td>${t.type}</td>
+                    <td><button class="delete" onclick="deleteTransaction(${index})">Delete</button></td>
+                </tr>`;
+                transactionList.innerHTML += row;
+                balance += t.type === "income" ? t.amount : -t.amount;
+            });
+
+            document.getElementById("balance").innerText = balance;
+        }
+
+        function deleteTransaction(index) {
+            transactions.splice(index, 1);
+            updateUI();
+        }
+    </script>
+</body>
+</html>
